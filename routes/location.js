@@ -18,20 +18,25 @@ class LocationRoute {
 
 	}
 
-	postLocation(req, res) {
-		let newLocation = new Location(req.body);
-		newLocation.save((error, location) => {
-			let message;
-			if(error) {
-				log.error(error);
-			}
-			else {
-				message = 'Location successfully added!', location;
-			}
-			res.json({
-				error,
-				message
+	handleError(res, reason, message, code = 500) {
+		/*
+		 * Logging error and responsing to user
+		 */
+		log.error(reason);
+		res.status(code)
+			.json({
+				error: message
 			});
+	}
+
+	postLocation(req, res) {
+		const newLocation = new Location(req.body);
+		newLocation.save((error, location) => {
+			if(error) handleError(res, error.message, 'Something goes wrong');
+			res.status(201)
+				.json({
+					message: 'Location successfully added!', location
+				});
 		});
 	}
 	
@@ -39,37 +44,23 @@ class LocationRoute {
 		Location
 			.find({})
 			.exec((error, locations) => {
-				console.log(locations);
-				if(error) log.error(error);
-				res.json({
-					error,
-					locations
-				});
+				if(error) handleError(res, error.message, 'Something goes wrong');
+				res.json(locations);
 			});
 	}
 
 	getLocation(req, res) {
 		Location.findById(req.params.id, (error, location) => {
-			if(error) log.error(error);
-			res.json({
-				error,
-				location
-			});
+			if(error) handleError(res, error.message, 'Something goes wrong');
+			res.json(location);
 		});
 	}
 
 	deleteLocation(req, res) {
 		Location.remove({_id : req.params.id}, (error, result) => {
-			let message;
-			if(error) {
-				log.error(error);
-			} else {
-				message = 'Location successfully deleted!';
-			}
-			// if no errors - send to client
+			if(error) handleError(res, error.message, 'Something goes wrong');
 			res.json({
-				error,
-				message,
+				message: 'Location successfully deleted!'
 			});
 		});
 	}
