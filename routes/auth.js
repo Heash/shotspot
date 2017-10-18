@@ -5,14 +5,12 @@
  */
 
 const passport = require('passport');
-const log = require('../lib/log');
-const mongoose = require('mongoose');
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user');
 
 
 class AuthRoute {
-	constructor(args) {
+	constructor() {
 
 		// Passport configuration
 		passport.use(new LocalStrategy({
@@ -22,37 +20,34 @@ class AuthRoute {
 
 			const query = {
 				email
-			}
+			};
 
-			User.findOne(query, (err, user) => {
-				return err 
-					? done(err)
-					: user
-						// checking pass with user method
-						? user.checkPassword(password)
-							? done(null, user)
-							: done(null, false, {
-								message: 'Incorrect password.'
-							})
-						: done(null, false, {
-							message: 'Incorrect username.'
-						});
+			User.findOne(query, (error, user) => {
+				if (error) return done(error);
+				if (!user) return done(null, false, {
+					message: 'Incorrect username.'
+				});
+				
+				if (user.checkPassword(password)) {
+					return done(null, user);
+				} else {
+					return done(null, false, {
+						message: 'Incorrect password.'
+					});
+				}
 			});
 		}));
 	}
 
 	// Login method
 	login(req, res, next) {
-		passport.authenticate('local', (error, user, info) => {
-			return error 
-				? next(error)
-				: user
-					? req.logIn(user, (error) => {
-							return error
-								? next(error)
-								: res.redirect('/');
-						})
-					: res.redirect('/login');
+		passport.authenticate('local', (error, user) => {
+			if (error) return next(error);
+			if (user) return res.redirect('/login');
+			req.logIn(user, error => {
+				if (error) return next(error);
+				res.redirect('/');
+			});
 		})(req, res, next);
 	}
 
@@ -62,14 +57,12 @@ class AuthRoute {
 			email: req.body.email,
 			password: req.body.password
 		});
-		user.save(function(err) {
-			return err
-				? next(err)
-				: req.logIn(user, function(err) {
-					return err
-						? next(err)
-						: res.redirect('/');
-				});
+		user.save(error => {
+			if (error) return next(error);
+			req.logIn(user, error => {
+				if (error) return next(error);
+				res.redirect('/');
+			});
 		});
 	}
 

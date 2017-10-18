@@ -19,6 +19,7 @@
   },
   "devDependencies": {},
   "scripts": {
+    "debug": "node app.js --inspect-brk",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
