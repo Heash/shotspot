@@ -4,7 +4,6 @@
  * Dependencies
  */
 
-const config = require('../config');
 const mongoose = require('../lib/mongoose');
 const crypto = require('crypto');
 
@@ -56,26 +55,26 @@ UserSchema.virtual('password')
 	})
 	.set(function(password) {
 		this._plainPassword = password;
-		this.salt = Math.random() + '';
+		this.salt = String(Math.random());
 		this.hashedPassword = this.encryptedPassword(password);
 	});
 
 // Pass validation
 UserSchema.path('hashedPassword')
-	.validate((val) => {
-	if(this._plainPassword || this._passwordConfirmation) {
-		if(this._plainPassword.length < 6) {
-			this.invalidate('password', 'must be at least 6 characters.');
+	.validate(() => {
+		if (this._plainPassword || this._passwordConfirmation) {
+			if (this._plainPassword.length < 6) {
+				this.invalidate('password', 'must be at least 6 characters.');
+			}
+			if (this._plainPassword !== this._passwordConfirmation) {
+				this.invalidate('passwordConfirmation', 'must match confirmation.');
+			}
 		}
-		if(this._plainPassword !== this._passwordConfirmation) {
-			this.invalidate('passwordConfirmation', 'must match confirmation.');
-		}
-	}
 
-	if(this.isNew && !this._plainPassword) {
-		this.invalidate('password', 'required');
-	}
-}, null);
+		if (this.isNew && !this._plainPassword) {
+			this.invalidate('password', 'required');
+		}
+	}, null);
 
 // Checking password method
 UserSchema.methods.checkPassword = function(password) {
