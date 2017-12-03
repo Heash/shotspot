@@ -36,7 +36,7 @@ app.use((req, res, next) => {
 app.use(passport.initialize());
 app.use(passport.session());
 
-/*
+/**
  * Requests
  */
 
@@ -60,8 +60,14 @@ app.get('/', (req, res) => res.json({
 	message: 'Welcome to our LocationStore!'
 }));
 
-/*
+/**
  * Port
  */
 
 app.listen(config.get('server:port') || 3000);
+
+/**
+ * Export
+ */
+
+module.exports = app;
