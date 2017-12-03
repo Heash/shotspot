@@ -72,8 +72,32 @@ describe('Locations', () => {
 		});
 	});
 
+	describe('/PUT/:id location', () => {
+		const changes = {
+			name: 'Сhicago',
+			coordinates: {
+				longitude: 12.223,
+				latitude: 11.223
+			}
+		}
+		Object.assign(location, changes);
+		it('it should POST new location', done => {
+			chai.request(app)
+				.put(`/location/${location._id}`)
+				.send(changes)
+				.end((err, res) => {
+					assert.propertyVal(res, 'status', 200);
+					assert.isObject(res.body);
+					assert.propertyVal(res.body, 'name', location.name);
+					assert.deepPropertyVal(res.body, 'coordinates', location.coordinates);
+
+					location = res.body;
+					done();
+				});
+		});
+	});
+
 	describe('/DELETE/:id location', () => {
-		location.name = 'Updated name';
 		it('it should Delete a location', done => {
 			chai.request(app)
 				.delete(`/location/${location._id}`)

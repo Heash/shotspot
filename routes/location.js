@@ -27,7 +27,7 @@ class LocationRoute {
 	postLocation(req, res) {
 		const newLocation = new Location(req.body);
 		newLocation.save((error, location) => {
-			if (error) this.handleError(res, error.message, 'Something goes wrong');
+			if (error) this.handleError(res, error.message, 'Something wrong while post location');
 			res.status(201)
 				.json({
 					message: 'Location successfully added!', location
@@ -39,21 +39,21 @@ class LocationRoute {
 		Location
 			.find({})
 			.exec((error, locations) => {
-				if (error) this.handleError(res, error.message, 'Something goes wrong');
+				if (error) this.handleError(res, error.message, 'Something wrong while get locations');
 				res.json(locations);
 			});
 	}
 
 	getLocation(req, res) {
 		Location.findById(req.params.id, (error, location) => {
-			if (error) this.handleError(res, error.message, 'Something goes wrong');
+			if (error) this.handleError(res, error.message, 'Something wrong while get location');
 			res.json(location);
 		});
 	}
 
 	deleteLocation(req, res) {
 		Location.remove({_id : req.params.id}, error => {
-			if (error) this.handleError(res, error.message, 'Something goes wrong');
+			if (error) this.handleError(res, error.message, 'Something wrong while delete location');
 			res.json({
 				message: 'Location successfully deleted!'
 			});
@@ -62,8 +62,17 @@ class LocationRoute {
 
 	updateLocation(req, res) {
 		// updateing location here
+		Location.findById(req.params.id, (error, location) => {
+			if (error) this.handleError(res, error.message, 'Something wrong while update location');
+
+			location.set(req.body);
+			location.save((err, updatedLocation) => {
+				if (error) this.handleError(res, error.message, 'Something wrong while update location');
+				res.send(updatedLocation);
+			});
+		});
 	}
 }
 
 
-exports = module.exports = new LocationRoute();
+module.exports = new LocationRoute();
